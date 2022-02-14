@@ -51,20 +51,20 @@ let (|/|) : complex -> complex -> complex = fun (a, b) (c, d) ->
         raise (Undefined "Undefined behavior")
 
 // Exercise 2.5
-let explode1 : string -> char list = fun s -> List.ofArray (s.ToCharArray())
+let explode1 (s : string) = List.ofArray (s.ToCharArray())
 let rec explode2 =
     function
     | "" -> []
     | s -> s.[0] :: explode2 (s.Remove(0,1))
 
 // Exercise 2.6
-let implode : char list -> string = fun cs -> List.foldBack (fun c s -> string c + s) cs ""
-let implodeRev : char list -> string = fun cs -> List.fold (fun s c -> string c + s) "" cs
+let implode (cs : char list) = List.foldBack (fun c s -> string c + s) cs ""
+let implodeRev (cs : char list) = List.fold (fun s c -> string c + s) "" cs
 
 // Exercise 2.7
 let toUpper = explode1 >> List.map System.Char.ToUpper >> implode
 let toUpper2 = implode << List.map System.Char.ToUpper << explode1
-let toUpper3 s = explode1 s |> List.map (System.Char.ToUpper) |> implode
+let toUpper3 s = explode1 s |> List.map System.Char.ToUpper |> implode
 
 // Exercise 2.8
 exception AckNegative of string
@@ -74,3 +74,45 @@ let rec ack =
     | (m, 0) when m > 0 -> ack (m - 1, 1)
     | (m, n) when m > 0 && n > 0 -> ack (m - 1, ack (m, n - 1))
     | _ -> raise (AckNegative("Negative numbers"))
+
+
+(*
+    YELLOW
+*)
+
+// Exercise 2.9
+let time f =
+    let start = System.DateTime.Now
+    let res = f ()
+    let finish = System.DateTime.Now
+    (res, finish - start)
+let timeArg1 f a = time (fun () -> f a)
+
+// Exercise 2.10
+let downto3 f n e =
+    match n with
+    | n when n > 0 -> List.foldBack f [1..(n-1)] (f n e)
+    | _ -> e
+let fac n = downto3 (*) n 1
+let range g n = downto3 (fun m e -> g m :: e) n []
+
+// Exercise 2.11
+type word = (char * int) list
+let hello : word = [('H', 4); ('E', 1); ('L', 1); ('L', 1); ('O', 1)]
+
+// Exercise 2.12
+type squareFun = word -> int -> int -> int
+let pointHelper (c, p) = p
+let singleLetterScore : squareFun = fun w pos acc -> pointHelper w.[pos] + acc
+let doubleLetterScore : squareFun = fun w pos acc -> pointHelper w.[pos] * 2 + acc
+let tripleLetterScore : squareFun = fun w pos acc -> pointHelper w.[pos] * 3 + acc
+
+// Exercise 2.13
+let doubleWordScore : squareFun = fun _ _ acc -> acc * 2
+let tripleWordScore : squareFun = fun _ _ acc -> acc * 3
+
+// Exercise 2.14
+let oddConsonants : squareFun = fun w pos acc ->
+    let consonants = ['B'; 'C'; 'D'; 'F'; 'G'; 'H'; 'J'; 'K'; 'L'; 'M'; 'N'; 'P'; 'Q'; 'R'; 'S'; 'T'; 'V'; 'W'; 'X'; 'Z']
+    let checkOdd = List.fold (fun s l -> if List.contains ((fun (a, b) -> a) l) consonants then not s else s) false
+    if checkOdd w then -acc else acc
