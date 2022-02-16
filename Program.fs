@@ -107,11 +107,10 @@ let hello : word = [('H', 4); ('E', 1); ('L', 1); ('L', 1); ('O', 1)]
 
 // Exercise 2.12
 type squareFun = word -> int -> int -> int
-let extractPoints (c, p) = p
 
-let singleLetterScore : squareFun = fun w pos acc -> extractPoints w.[pos] + acc
-let doubleLetterScore : squareFun = fun w pos acc -> extractPoints w.[pos] * 2 + acc
-let tripleLetterScore : squareFun = fun w pos acc -> extractPoints w.[pos] * 3 + acc
+let singleLetterScore : squareFun = fun w pos acc -> snd w.[pos] + acc
+let doubleLetterScore : squareFun = fun w pos acc -> snd w.[pos] * 2 + acc
+let tripleLetterScore : squareFun = fun w pos acc -> snd w.[pos] * 3 + acc
 
 // Exercise 2.13
 let doubleWordScore : squareFun = fun _ _ acc -> acc * 2
@@ -139,14 +138,12 @@ let DWS : square = SLS @ [(1, doubleWordScore)]
 let TWS : square = SLS @ [(1, tripleWordScore)]
 
 let calculatePoints : square list -> word -> int = fun squares w ->
-    let extractFirst (x, _) = x
-    let extractSecond (_, x) = x
     let applyWord i (priority, f) = (priority, f w i)
     let calculate =
         ((List.mapi (fun i sq -> List.map (applyWord i) sq))
         >> (List.fold (fun s sq -> sq @ s) [])
-        >> (List.sortBy extractFirst)
-        >> (List.map extractSecond)
+        >> (List.sortBy fst)
+        >> (List.map snd)
         >> (List.fold (fun s f -> f s)) 0)
     calculate squares
 
